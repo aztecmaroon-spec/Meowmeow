@@ -16,20 +16,23 @@
             color: #00ff00;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            padding: 20px;
+            padding: 5vw; /* responsive padding */
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            font-size: 1rem; /* base size */
+            line-height: 1.6;
         }
 
         .terminal {
-            max-width: 800px;
+            max-width: 95%; /* fits mobile screens */
             margin: 0 auto;
         }
 
         .output {
             margin-bottom: 20px;
             line-height: 1.6;
+            word-break: break-word;
         }
 
         .prompt {
@@ -40,6 +43,8 @@
 
         .prompt-symbol {
             margin-right: 8px;
+            color: #00ff41;
+            font-size: 1.1rem;
         }
 
         input {
@@ -47,18 +52,21 @@
             border: none;
             color: #00ff41;
             font-family: 'Courier New', monospace;
-            font-size: 16px;
+            font-size: 1rem;
             font-weight: bold;
             outline: none;
             flex: 1;
+            padding: 8px; /* more tap-friendly */
+            caret-color: #00ff41;
         }
 
         .cursor {
             display: inline-block;
-            width: 8px;
-            height: 16px;
+            width: 10px;
+            height: 18px;
             background-color: #00ff41;
             animation: blink 1s infinite;
+            margin-left: 6px;
         }
 
         @keyframes blink {
@@ -79,10 +87,53 @@
             font-size: 12px;
             line-height: 1.2;
             margin: 20px 0;
+            color: #ff69b4;
         }
 
         .hidden {
             display: none;
+        }
+
+        /* Responsive adjustments for mobile */
+        @media (max-width: 900px) {
+            body {
+                font-size: 1.05rem;
+            }
+
+            .ascii-art {
+                font-size: 13px;
+            }
+
+            input {
+                font-size: 1.05rem;
+                padding: 9px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            body {
+                font-size: 1.2rem; /* larger text */
+                line-height: 1.8;
+                padding: 6vw;
+            }
+
+            .ascii-art {
+                font-size: 14px; /* bigger ASCII art */
+            }
+
+            input {
+                font-size: 1.2rem;
+                padding: 12px;
+            }
+
+            .prompt-symbol {
+                font-size: 1.2rem;
+            }
+
+            .cursor {
+                width: 12px;
+                height: 20px;
+            }
         }
     </style>
 </head>
@@ -100,7 +151,7 @@
         
         <div class="prompt">
             <span class="prompt-symbol">&gt;</span>
-            <input type="text" id="userInput" autofocus autocomplete="off">
+            <input type="text" id="userInput" autofocus autocomplete="off" inputmode="text" />
         </div>
     </div>
 
