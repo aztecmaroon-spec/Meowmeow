@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Meowmeow Terminal</title>
     <style>
         * {
@@ -11,75 +11,106 @@
             box-sizing: border-box;
         }
 
+        /* Romantic color scheme */
+        :root{
+            --bg: #1a0b0f;         /* deep wine / near-black */
+            --panel: #2b0f16;      /* slightly lighter wine */
+            --text: #ffdfe8;       /* soft blush */
+            --accent: #ff6fa3;     /* rose pink */
+            --accent-2: #ffb86b;   /* warm gold */
+            --muted: #f7cfe0;      /* pale pink */
+            --error: #ff8a8a;      /* soft coral */
+            --heart: #ff4d7a;      /* vivid rose */
+            --input-caret: #ff9cc1;/* bright caret */
+        }
+
         body {
-            background-color: #0c0c0c;
-            color: #00ff00;
+            background-color: var(--bg);
+            color: var(--text);
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            padding: 5vw; /* responsive padding */
+            padding: 5vw;
             min-height: 100vh;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
-            font-size: 1rem; /* base size */
+            font-size: 1rem;
             line-height: 1.6;
         }
 
         .terminal {
-            max-width: 95%; /* fits mobile screens */
+            max-width: 95%;
             margin: 0 auto;
+            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+            border: 1px solid rgba(255,184,107,0.06);
+            padding: 1.2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.6), 0 0 30px rgba(255,111,163,0.03) inset;
         }
 
         .output {
             margin-bottom: 20px;
             line-height: 1.6;
             word-break: break-word;
+            color: var(--text);
+        }
+
+        .output div {
+            margin-bottom: 6px;
         }
 
         .prompt {
             display: flex;
             align-items: center;
             margin-top: 10px;
+            gap: 8px;
         }
 
         .prompt-symbol {
             margin-right: 8px;
-            color: #00ff41;
+            color: var(--accent-2);
             font-size: 1.1rem;
+            user-select: none;
         }
 
         input {
             background: transparent;
             border: none;
-            color: #00ff41;
+            color: var(--muted);
             font-family: 'Courier New', monospace;
             font-size: 1rem;
             font-weight: bold;
             outline: none;
             flex: 1;
-            padding: 8px; /* more tap-friendly */
-            caret-color: #00ff41;
+            padding: 10px;
+            caret-color: var(--input-caret);
+            -webkit-text-fill-color: var(--muted);
+        }
+
+        input::placeholder {
+            color: rgba(255,223,232,0.35);
         }
 
         .cursor {
             display: inline-block;
             width: 10px;
             height: 18px;
-            background-color: #00ff41;
+            background-color: var(--input-caret);
             animation: blink 1s infinite;
             margin-left: 6px;
+            border-radius: 2px;
         }
 
         @keyframes blink {
-            0%, 49% { opacity: 1; }
-            50%, 100% { opacity: 0; }
+            0%, 49% { opacity: 1; transform: scaleY(1); }
+            50%, 100% { opacity: 0; transform: scaleY(0.9); }
         }
 
         .error {
-            color: #ff6b6b;
+            color: var(--error);
         }
 
         .heart {
-            color: #ff69b4;
+            color: var(--heart);
         }
 
         .ascii-art {
@@ -87,68 +118,58 @@
             font-size: 12px;
             line-height: 1.2;
             margin: 20px 0;
-            color: #ff69b4;
+            color: var(--accent);
         }
 
         .hidden {
             display: none;
         }
 
-        /* Responsive adjustments for mobile */
+        /* small decorative header text */
+        .brand {
+            color: var(--accent-2);
+            font-size: 0.95rem;
+            margin-bottom: 6px;
+        }
+
+        .divider {
+            color: rgba(255,255,255,0.04);
+            margin: 8px 0;
+        }
+
+        /* Responsive adjustments */
         @media (max-width: 900px) {
-            body {
-                font-size: 1.05rem;
-            }
-
-            .ascii-art {
-                font-size: 13px;
-            }
-
-            input {
-                font-size: 1.05rem;
-                padding: 9px;
-            }
+            body { font-size: 1.05rem; }
+            .ascii-art { font-size: 13px; }
+            input { font-size: 1.05rem; padding: 9px; }
         }
 
         @media (max-width: 600px) {
             body {
-                font-size: 1.2rem; /* larger text */
+                font-size: 1.18rem;
                 line-height: 1.8;
                 padding: 6vw;
             }
-
-            .ascii-art {
-                font-size: 14px; /* bigger ASCII art */
-            }
-
-            input {
-                font-size: 1.2rem;
-                padding: 12px;
-            }
-
-            .prompt-symbol {
-                font-size: 1.2rem;
-            }
-
-            .cursor {
-                width: 12px;
-                height: 20px;
-            }
+            .ascii-art { font-size: 14px; }
+            input { font-size: 1.18rem; padding: 12px; }
+            .prompt-symbol { font-size: 1.2rem; }
+            .cursor { width: 12px; height: 20px; }
+            .terminal { border-radius: 10px; padding: 1rem; }
         }
     </style>
 </head>
 <body>
     <div class="terminal">
         <div class="output" id="output">
-            <div>Meowmeow Terminal v3.3</div>
+            <div class="brand">Meowmeow Terminal v3.3</div>
             <div>© 2026 DiVa Systems Inc.</div>
-            <div>----------------------------------------</div>
+            <div class="divider">----------------------------------------</div>
             <div style="margin-top: 20px;"></div>
             <div>System Initialization...</div>
             <div style="margin-top: 15px;"></div>
             <div>Please enter your name:</div>
         </div>
-        
+
         <div class="prompt">
             <span class="prompt-symbol">&gt;</span>
             <input type="text" id="userInput" autofocus autocomplete="off" inputmode="text" />
@@ -158,73 +179,61 @@
     <script>
         const input = document.getElementById('userInput');
         const output = document.getElementById('output');
-        
+
         let stage = 'name'; // Stages: name, survey_prompt, pizza_question, varun_question, survey_enjoyment, valentine_question
         let selfDestructTimer = null;
-        
+
         // Create audio context
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        
+
         function playSadJingle() {
             const now = audioContext.currentTime;
-            
-            // "What Was I Made For" meow version - sad, slow melody
             const notes = [
-                { freq: 329.63, time: 0, duration: 0.4 },     // E (meow)
-                { freq: 293.66, time: 0.5, duration: 0.4 },   // D (meow)
-                { freq: 261.63, time: 1.0, duration: 0.5 },   // C (meooow)
-                { freq: 246.94, time: 1.6, duration: 0.4 },   // B (meow)
-                { freq: 220.00, time: 2.1, duration: 0.6 },   // A (meooow)
-                { freq: 196.00, time: 2.8, duration: 0.8 }    // G (meeooow - sad)
+                { freq: 329.63, time: 0, duration: 0.4 },
+                { freq: 293.66, time: 0.5, duration: 0.4 },
+                { freq: 261.63, time: 1.0, duration: 0.5 },
+                { freq: 246.94, time: 1.6, duration: 0.4 },
+                { freq: 220.00, time: 2.1, duration: 0.6 },
+                { freq: 196.00, time: 2.8, duration: 0.8 }
             ];
-            
+
             notes.forEach(note => {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
                 oscillator.frequency.value = note.freq;
                 oscillator.type = 'sine';
-                
                 gainNode.gain.setValueAtTime(0, now + note.time);
                 gainNode.gain.linearRampToValueAtTime(0.25, now + note.time + 0.01);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
-                
                 oscillator.start(now + note.time);
                 oscillator.stop(now + note.time + note.duration);
             });
         }
-        
+
         function playHappyJingle() {
             const now = audioContext.currentTime;
-            
-            // Happy happy happy cat song - upbeat, cheerful melody
             const notes = [
-                { freq: 523.25, time: 0, duration: 0.2 },     // C5 (happy!)
-                { freq: 587.33, time: 0.2, duration: 0.2 },   // D5 (happy!)
-                { freq: 659.25, time: 0.4, duration: 0.2 },   // E5 (happy!)
-                { freq: 698.46, time: 0.6, duration: 0.3 },   // F5 (cat!)
-                { freq: 659.25, time: 0.9, duration: 0.2 },   // E5 (happy!)
-                { freq: 587.33, time: 1.1, duration: 0.2 },   // D5 (happy!)
-                { freq: 523.25, time: 1.3, duration: 0.4 }    // C5 (yay!)
+                { freq: 523.25, time: 0, duration: 0.2 },
+                { freq: 587.33, time: 0.2, duration: 0.2 },
+                { freq: 659.25, time: 0.4, duration: 0.2 },
+                { freq: 698.46, time: 0.6, duration: 0.3 },
+                { freq: 659.25, time: 0.9, duration: 0.2 },
+                { freq: 587.33, time: 1.1, duration: 0.2 },
+                { freq: 523.25, time: 1.3, duration: 0.4 }
             ];
-            
+
             notes.forEach(note => {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
                 oscillator.frequency.value = note.freq;
                 oscillator.type = 'triangle';
-                
                 gainNode.gain.setValueAtTime(0, now + note.time);
                 gainNode.gain.linearRampToValueAtTime(0.3, now + note.time + 0.01);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
-                
                 oscillator.start(now + note.time);
                 oscillator.stop(now + note.time + note.duration);
             });
@@ -232,53 +241,36 @@
 
         function playDrumroll() {
             const now = audioContext.currentTime;
-            
-            // Create a pleasant drumroll with tonal drums
-            // Use lower frequency oscillators for a warm drum sound
             const rollDuration = 2.0;
-            const hitsPerSecond = 16; // Start slower
+            const hitsPerSecond = 16;
             const totalHits = Math.floor(rollDuration * hitsPerSecond);
-            
+
             for (let i = 0; i < totalHits; i++) {
                 const oscillator = audioContext.createOscillator();
                 const gainNode = audioContext.createGain();
-                
                 oscillator.connect(gainNode);
                 gainNode.connect(audioContext.destination);
-                
-                // Warm drum tone around 150-200 Hz
                 oscillator.frequency.value = 180 + Math.random() * 20;
                 oscillator.type = 'triangle';
-                
-                // Progressive timing - speed up slightly toward the end
                 const timeSpacing = 0.06 - (i / totalHits) * 0.02;
                 const time = now + (i * timeSpacing);
-                
-                // Gradually increase volume
                 const volume = 0.15 + (i / totalHits) * 0.15;
-                
                 gainNode.gain.setValueAtTime(0, time);
                 gainNode.gain.linearRampToValueAtTime(volume, time + 0.005);
                 gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
-                
                 oscillator.start(time);
                 oscillator.stop(time + 0.05);
             }
-            
-            // Final cymbal/bell sound - bright and celebratory
+
             const cymbalTime = now + 2.0;
             const cymbal = audioContext.createOscillator();
             const cymbalGain = audioContext.createGain();
-            
             cymbal.connect(cymbalGain);
             cymbalGain.connect(audioContext.destination);
-            
-            cymbal.frequency.value = 1200; // Bright bell tone
+            cymbal.frequency.value = 1200;
             cymbal.type = 'sine';
-            
             cymbalGain.gain.setValueAtTime(0.25, cymbalTime);
             cymbalGain.gain.exponentialRampToValueAtTime(0.01, cymbalTime + 0.5);
-            
             cymbal.start(cymbalTime);
             cymbal.stop(cymbalTime + 0.5);
         }
@@ -290,18 +282,16 @@
             output.appendChild(div);
             window.scrollTo(0, document.body.scrollHeight);
         }
-        
+
         function selfDestruct() {
             addOutput('');
             addOutput('⚠️  UNAUTHORIZED ACCESS DETECTED ⚠️', 'error');
             addOutput('Initiating self-destruct sequence...', 'error');
             addOutput('');
-            
             let countdown = 5;
             const countdownInterval = setInterval(() => {
                 addOutput(countdown + '...', 'error');
                 countdown--;
-                
                 if (countdown < 0) {
                     clearInterval(countdownInterval);
                     addOutput('');
@@ -310,9 +300,8 @@
                     addOutput('This terminal will now close.');
                     input.disabled = true;
                     input.style.display = 'none';
-                    
                     setTimeout(() => {
-                        document.body.innerHTML = '<div style="color: #ff0000; font-family: monospace; text-align: center; padding: 50px; font-size: 24px;">ACCESS DENIED</div>';
+                        document.body.innerHTML = '<div style="color: #ff4d7a; font-family: monospace; text-align: center; padding: 50px; font-size: 24px;">ACCESS DENIED</div>';
                     }, 2000);
                 }
             }, 1000);
@@ -320,7 +309,6 @@
 
         function showSadResponse() {
             playSadJingle();
-            
             const sadArt = `
     ___
    /   \\
@@ -329,13 +317,11 @@
     |||
     |||
 `;
-            
             addOutput('');
             addOutput(sadArt, 'ascii-art heart');
             addOutput('ERROR: Response "no" not accepted.', 'error');
             addOutput('Processing sadness...', 'error');
             addOutput('');
-            
             setTimeout(() => {
                 addOutput('Please reconsider...');
                 addOutput('');
@@ -346,7 +332,6 @@
 
         function showHappyResponse() {
             playHappyJingle();
-            
             const happyArt = `
     ♥♥♥
    ♥   ♥
@@ -356,7 +341,6 @@
    ♥   ♥
     ♥♥♥
 `;
-            
             addOutput('');
             addOutput(happyArt, 'ascii-art heart');
             addOutput('🎉 YAYYYYYYYYYYYY🎉');
@@ -373,11 +357,9 @@
             if (e.key === 'Enter') {
                 const value = input.value.trim();
                 const valueLower = value.toLowerCase();
-                
                 addOutput('> ' + input.value);
-                
+
                 if (stage === 'name') {
-                    // Check if name is Diti or Diti Golder
                     if (valueLower === 'diti' || valueLower === 'diti golder') {
                         addOutput('');
                         addOutput('✓ Identity verified: ' + value);
@@ -453,7 +435,6 @@
                             addOutput('On a scale of 1-10, how much do you love Varun?');
                             addOutput('');
                             addOutput('Please enter a number:');
-                            // Stay in varun_question stage
                         } else {
                             addOutput('GIRL YOU PLAYIN');
                             addOutput('');
@@ -462,7 +443,6 @@
                             addOutput('On a scale of 1-10, how much do you love Varun?');
                             addOutput('');
                             addOutput('Please enter a number:');
-                            // Stay in varun_question stage
                         }
                     } else {
                         addOutput('GIRL YOU PLAYIN');
@@ -472,7 +452,6 @@
                         addOutput('On a scale of 1-10, how much do you love Varun?');
                         addOutput('');
                         addOutput('Please enter a number:');
-                        // Stay in varun_question stage
                     }
                 } else if (stage === 'survey_enjoyment') {
                     addOutput('');
@@ -487,16 +466,12 @@
                     addOutput('----------------------------------------');
                     addOutput('SURVEY - QUESTION 4 OF 4');
                     addOutput('');
-                    
-                    // Play drumroll
                     playDrumroll();
-                    
                     setTimeout(() => {
                         addOutput('💝 Diti, will you be my Valentine? 💝');
                         addOutput('');
                         addOutput('Please type \'yes\' or \'no\' and press Enter:');
-                    }, 2500); // Wait for drumroll to finish
-                    
+                    }, 2500);
                     stage = 'valentine_question';
                 } else if (stage === 'valentine_question') {
                     if (valueLower === 'yes') {
@@ -509,7 +484,7 @@
                         addOutput('');
                     }
                 }
-                
+
                 input.value = '';
             }
         });
