@@ -1,27 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Meowmeow Terminal</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
-        /* Romantic color scheme */
+        /* Romantic color scheme variables */
         :root{
             --bg: #1a0b0f;         /* deep wine / near-black */
             --panel: #2b0f16;      /* slightly lighter wine */
-            --text: #ffdfe8;       /* soft blush */
-            --accent: #ff6fa3;     /* rose pink */
-            --accent-2: #ffb86b;   /* warm gold */
-            --muted: #f7cfe0;      /* pale pink */
-            --error: #ff8a8a;      /* soft coral */
-            --heart: #ff4d7a;      /* vivid rose */
+            --text: #ffdfe8;       /* soft blush (default body text) */
+            --muted: #f7cfe0;      /* pale pink (secondary text) */
+            --accent: #ff6fa3;     /* rose pink (highlights) */
+            --accent-2: #ffb86b;   /* warm gold (prompts / symbols) */
+            --heart: #ff4d7a;      /* vivid rose (hearts / important) */
+            --error: #ff8a8a;      /* soft coral (errors) */
             --input-caret: #ff9cc1;/* bright caret */
+            --system: #ffd1e0;     /* system messages (lighter) */
+            --user: #ffe9d6;       /* user input echoes (warm) */
+            --divider: rgba(255,223,232,0.06);
+        }
+
+        html, body {
+            height: 100%;
         }
 
         body {
@@ -40,7 +43,7 @@
         .terminal {
             max-width: 95%;
             margin: 0 auto;
-            background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.02));
+            background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(0,0,0,0.02));
             border: 1px solid rgba(255,184,107,0.06);
             padding: 1.2rem;
             border-radius: 12px;
@@ -54,8 +57,50 @@
             color: var(--text);
         }
 
-        .output div {
+        /* Different text roles use distinct colors for visual hierarchy */
+        .brand {
+            color: var(--accent-2);
+            font-size: 0.95rem;
             margin-bottom: 6px;
+        }
+
+        .meta {
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        .divider {
+            color: var(--divider);
+            margin: 8px 0;
+        }
+
+        .system {
+            color: var(--system);
+        }
+
+        .prompt-text {
+            color: var(--accent);
+        }
+
+        .user-echo {
+            color: var(--user);
+        }
+
+        .important {
+            color: var(--heart);
+            font-weight: 900;
+        }
+
+        .error {
+            color: var(--error);
+        }
+
+        .ascii-art {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 1.2;
+            margin: 20px 0;
+            color: var(--accent);
         }
 
         .prompt {
@@ -66,7 +111,6 @@
         }
 
         .prompt-symbol {
-            margin-right: 8px;
             color: var(--accent-2);
             font-size: 1.1rem;
             user-select: none;
@@ -105,37 +149,8 @@
             50%, 100% { opacity: 0; transform: scaleY(0.9); }
         }
 
-        .error {
-            color: var(--error);
-        }
-
-        .heart {
-            color: var(--heart);
-        }
-
-        .ascii-art {
-            white-space: pre;
-            font-size: 12px;
-            line-height: 1.2;
-            margin: 20px 0;
-            color: var(--accent);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        /* small decorative header text */
-        .brand {
-            color: var(--accent-2);
-            font-size: 0.95rem;
-            margin-bottom: 6px;
-        }
-
-        .divider {
-            color: rgba(255,255,255,0.04);
-            margin: 8px 0;
-        }
+        /* small spacing for output lines */
+        .output div { margin-bottom: 6px; }
 
         /* Responsive adjustments */
         @media (max-width: 900px) {
@@ -162,12 +177,12 @@
     <div class="terminal">
         <div class="output" id="output">
             <div class="brand">Meowmeow Terminal v3.3</div>
-            <div>© 2026 DiVa Systems Inc.</div>
+            <div class="meta">© 2026 DiVa Systems Inc.</div>
             <div class="divider">----------------------------------------</div>
             <div style="margin-top: 20px;"></div>
-            <div>System Initialization...</div>
+            <div class="system">System Initialization...</div>
             <div style="margin-top: 15px;"></div>
-            <div>Please enter your name:</div>
+            <div class="prompt-text">Please enter your name:</div>
         </div>
 
         <div class="prompt">
@@ -181,7 +196,6 @@
         const output = document.getElementById('output');
 
         let stage = 'name'; // Stages: name, survey_prompt, pizza_question, varun_question, survey_enjoyment, valentine_question
-        let selfDestructTimer = null;
 
         // Create audio context
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -284,24 +298,24 @@
         }
 
         function selfDestruct() {
-            addOutput('');
+            addOutput('', '');
             addOutput('⚠️  UNAUTHORIZED ACCESS DETECTED ⚠️', 'error');
             addOutput('Initiating self-destruct sequence...', 'error');
-            addOutput('');
+            addOutput('', '');
             let countdown = 5;
             const countdownInterval = setInterval(() => {
                 addOutput(countdown + '...', 'error');
                 countdown--;
                 if (countdown < 0) {
                     clearInterval(countdownInterval);
-                    addOutput('');
+                    addOutput('', '');
                     addOutput('💥 SYSTEM DESTROYED 💥', 'error');
-                    addOutput('');
-                    addOutput('This terminal will now close.');
+                    addOutput('', '');
+                    addOutput('This terminal will now close.', 'system');
                     input.disabled = true;
                     input.style.display = 'none';
                     setTimeout(() => {
-                        document.body.innerHTML = '<div style="color: #ff4d7a; font-family: monospace; text-align: center; padding: 50px; font-size: 24px;">ACCESS DENIED</div>';
+                        document.body.innerHTML = '<div style="color: var(--heart); font-family: monospace; text-align: center; padding: 50px; font-size: 24px;">ACCESS DENIED</div>';
                     }, 2000);
                 }
             }, 1000);
@@ -317,16 +331,16 @@
     |||
     |||
 `;
-            addOutput('');
-            addOutput(sadArt, 'ascii-art heart');
+            addOutput('', '');
+            addOutput(sadArt, 'ascii-art important');
             addOutput('ERROR: Response "no" not accepted.', 'error');
             addOutput('Processing sadness...', 'error');
-            addOutput('');
+            addOutput('', '');
             setTimeout(() => {
-                addOutput('Please reconsider...');
-                addOutput('');
-                addOutput('Diti, will you be my Valentine?');
-                addOutput('Please type \'yes\' or \'no\' and press Enter:');
+                addOutput('Please reconsider...', 'system');
+                addOutput('', '');
+                addOutput('Diti, will you be my Valentine?', 'prompt-text');
+                addOutput('Please type \'yes\' or \'no\' and press Enter:', 'prompt-text');
             }, 3500);
         }
 
@@ -341,14 +355,14 @@
    ♥   ♥
     ♥♥♥
 `;
-            addOutput('');
-            addOutput(happyArt, 'ascii-art heart');
-            addOutput('🎉 YAYYYYYYYYYYYY🎉');
-            addOutput('');
-            addOutput('I love you so much! ❤️');
-            addOutput('Can\'t wait to spend my first Valentine\'s with you! 💕');
-            addOutput('');
-            addOutput('System status: COMPLETE');
+            addOutput('', '');
+            addOutput(happyArt, 'ascii-art important');
+            addOutput('🎉 YAYYYYYYYYYYYY🎉', 'important');
+            addOutput('', '');
+            addOutput('I love you so much! ❤️', 'important');
+            addOutput('Can\'t wait to spend my first Valentine\'s with you! 💕', 'important');
+            addOutput('', '');
+            addOutput('System status: COMPLETE', 'system');
             input.disabled = true;
             input.style.display = 'none';
         }
@@ -357,120 +371,116 @@
             if (e.key === 'Enter') {
                 const value = input.value.trim();
                 const valueLower = value.toLowerCase();
-                addOutput('> ' + input.value);
+
+                // Echo user input with a distinct color
+                addOutput('> ' + input.value, 'user-echo');
 
                 if (stage === 'name') {
                     if (valueLower === 'diti' || valueLower === 'diti golder') {
-                        addOutput('');
-                        addOutput('✓ Identity verified: ' + value);
-                        addOutput('Welcome, ' + value + '!');
-                        addOutput('');
-                        addOutput('----------------------------------------');
-                        addOutput('You have been selected to complete a short survey.');
-                        addOutput('');
-                        addOutput('Do you want to continue? (yes/no)');
+                        addOutput('', '');
+                        addOutput('✓ Identity verified: ' + value, 'system');
+                        addOutput('Welcome, ' + value + '!', 'system');
+                        addOutput('', '');
+                        addOutput('----------------------------------------', 'divider');
+                        addOutput('You have been selected to complete a short survey.', 'system');
+                        addOutput('', '');
+                        addOutput('Do you want to continue? (yes/no)', 'prompt-text');
                         stage = 'survey_prompt';
                     } else {
-                        addOutput('');
+                        addOutput('', '');
                         addOutput('✗ Identity verification failed.', 'error');
                         selfDestruct();
                     }
                 } else if (stage === 'survey_prompt') {
-                    addOutput('');
+                    addOutput('', '');
                     if (valueLower === 'no') {
-                        addOutput('jk this is mandatory');
-                        addOutput('Continuing with survey...');
+                        addOutput('jk this is mandatory', 'system');
+                        addOutput('Continuing with survey...', 'system');
                     } else {
-                        addOutput('Great! Let\'s begin...');
+                        addOutput('Great! Let\'s begin...', 'system');
                     }
-                    addOutput('');
-                    addOutput('----------------------------------------');
-                    addOutput('SURVEY - QUESTION 1 OF 4');
-                    addOutput('');
-                    addOutput('On a scale of 1-10, how much do you love pizza?');
-                    addOutput('');
-                    addOutput('Please enter a number from 1 to 10:');
+                    addOutput('', '');
+                    addOutput('----------------------------------------', 'divider');
+                    addOutput('SURVEY - QUESTION 1 OF 4', 'system');
+                    addOutput('', '');
+                    addOutput('On a scale of 1-10, how much do you love pizza?', 'prompt-text');
+                    addOutput('Please enter a number from 1 to 10:', 'prompt-text');
                     stage = 'pizza_question';
                 } else if (stage === 'pizza_question') {
                     const pizzaRating = parseInt(valueLower);
-                    addOutput('');
+                    addOutput('', '');
                     if (pizzaRating >= 1 && pizzaRating <= 10) {
                         if (pizzaRating >= 8) {
-                            addOutput('literally same 🍕');
+                            addOutput('literally same 🍕', 'system');
                         } else if (pizzaRating >= 5) {
-                            addOutput('not great not terrible 🍕');
+                            addOutput('not great not terrible 🍕', 'system');
                         } else {
-                            addOutput('BUT IT HAS PEPPERONI 🍕');
+                            addOutput('BUT IT HAS PEPPERONI 🍕', 'system');
                         }
                     } else {
-                        addOutput('That\'s... not a number between 1-10, but okay! 🍕');
+                        addOutput('That\'s... not a number between 1-10, but okay! 🍕', 'system');
                     }
-                    addOutput('');
-                    addOutput('----------------------------------------');
-                    addOutput('SURVEY - QUESTION 2 OF 4');
-                    addOutput('');
-                    addOutput('On a scale of 1-10, how much do you love Varun?');
-                    addOutput('');
-                    addOutput('Please enter a number:');
+                    addOutput('', '');
+                    addOutput('----------------------------------------', 'divider');
+                    addOutput('SURVEY - QUESTION 2 OF 4', 'system');
+                    addOutput('', '');
+                    addOutput('On a scale of 1-10, how much do you love Varun?', 'prompt-text');
+                    addOutput('Please enter a number:', 'prompt-text');
                     stage = 'varun_question';
                 } else if (stage === 'varun_question') {
                     const varunRating = parseInt(valueLower);
-                    addOutput('');
+                    addOutput('', '');
                     if (!isNaN(varunRating)) {
                         if (varunRating >= 8) {
-                            addOutput('woah that\'s a lot 💕');
-                            addOutput('');
-                            addOutput('----------------------------------------');
-                            addOutput('SURVEY - QUESTION 3 OF 4');
-                            addOutput('');
-                            addOutput('Are you enjoying this survey so far?');
-                            addOutput('');
-                            addOutput('Please type \'yes\' or \'no\' and press Enter:');
+                            addOutput('woah that\'s a lot 💕', 'important');
+                            addOutput('', '');
+                            addOutput('----------------------------------------', 'divider');
+                            addOutput('SURVEY - QUESTION 3 OF 4', 'system');
+                            addOutput('', '');
+                            addOutput('Are you enjoying this survey so far?', 'prompt-text');
+                            addOutput('Please type \'yes\' or \'no\' and press Enter:', 'prompt-text');
                             stage = 'survey_enjoyment';
                         } else if (varunRating >= 1 && varunRating <= 7) {
-                            addOutput('i kinda expected more tbh');
-                            addOutput('');
-                            addOutput('Let\'s try that again...');
-                            addOutput('');
-                            addOutput('On a scale of 1-10, how much do you love Varun?');
-                            addOutput('');
-                            addOutput('Please enter a number:');
+                            addOutput('i kinda expected more tbh', 'system');
+                            addOutput('', '');
+                            addOutput('Let\'s try that again...', 'system');
+                            addOutput('', '');
+                            addOutput('On a scale of 1-10, how much do you love Varun?', 'prompt-text');
+                            addOutput('Please enter a number:', 'prompt-text');
                         } else {
-                            addOutput('GIRL YOU PLAYIN');
-                            addOutput('');
-                            addOutput('Let\'s be serious now...');
-                            addOutput('');
-                            addOutput('On a scale of 1-10, how much do you love Varun?');
-                            addOutput('');
-                            addOutput('Please enter a number:');
+                            addOutput('GIRL YOU PLAYIN', 'system');
+                            addOutput('', '');
+                            addOutput('Let\'s be serious now...', 'system');
+                            addOutput('', '');
+                            addOutput('On a scale of 1-10, how much do you love Varun?', 'prompt-text');
+                            addOutput('Please enter a number:', 'prompt-text');
                         }
                     } else {
-                        addOutput('GIRL YOU PLAYIN');
-                        addOutput('');
-                        addOutput('Let\'s be serious now...');
-                        addOutput('');
-                        addOutput('On a scale of 1-10, how much do you love Varun?');
-                        addOutput('');
-                        addOutput('Please enter a number:');
+                        addOutput('GIRL YOU PLAYIN', 'system');
+                        addOutput('', '');
+                        addOutput('Let\'s be serious now...', 'system');
+                        addOutput('', '');
+                        addOutput('On a scale of 1-10, how much do you love Varun?', 'prompt-text');
+                        addOutput('Please enter a number:', 'prompt-text');
                     }
                 } else if (stage === 'survey_enjoyment') {
-                    addOutput('');
+                    addOutput('', '');
                     if (valueLower === 'yes') {
-                        addOutput('Yay! I\'m glad!');
+                        addOutput('Yay! I\'m glad!', 'system');
                     } else if (valueLower === 'no') {
-                        addOutput('Too bad, one more question!');
+                        addOutput('Too bad, one more question!', 'system');
                     } else {
-                        addOutput('I\'ll take that as a maybe...');
+                        addOutput('I\'ll take that as a maybe...', 'system');
                     }
-                    addOutput('');
-                    addOutput('----------------------------------------');
-                    addOutput('SURVEY - QUESTION 4 OF 4');
-                    addOutput('');
+                    addOutput('', '');
+                    addOutput('----------------------------------------', 'divider');
+                    addOutput('SURVEY - QUESTION 4 OF 4', 'system');
+                    addOutput('', '');
                     playDrumroll();
                     setTimeout(() => {
-                        addOutput('💝 Diti, will you be my Valentine? 💝');
-                        addOutput('');
-                        addOutput('Please type \'yes\' or \'no\' and press Enter:');
+                        addOutput('💝 Diti, will you be my Valentine? 💝', 'prompt-text');
+                        addOutput('', '');
+                        addOutput('Please type \'yes\' or \'no\' and press Enter:', 'prompt-text');
                     }, 2500);
                     stage = 'valentine_question';
                 } else if (stage === 'valentine_question') {
@@ -479,9 +489,9 @@
                     } else if (valueLower === 'no') {
                         showSadResponse();
                     } else {
-                        addOutput('');
+                        addOutput('', '');
                         addOutput('Invalid input. Please type \'yes\' or \'no\'.', 'error');
-                        addOutput('');
+                        addOutput('', '');
                     }
                 }
 
