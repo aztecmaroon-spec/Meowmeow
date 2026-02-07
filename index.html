@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meowmeow Terminal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0c0c0c;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .terminal {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .output {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .prompt {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .prompt-symbol {
+            margin-right: 8px;
+        }
+
+        input {
+            background: transparent;
+            border: none;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+            outline: none;
+            flex: 1;
+        }
+
+        .cursor {
+            display: inline-block;
+            width: 8px;
+            height: 16px;
+            background-color: #00ff00;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0; }
+        }
+
+        .error {
+            color: #ff6b6b;
+        }
+
+        .heart {
+            color: #ff69b4;
+        }
+
+        .ascii-art {
+            white-space: pre;
+            font-size: 12px;
+            line-height: 1.2;
+            margin: 20px 0;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="output" id="output">
+            <div>Meowmeow Terminal v3.3</div>
+            <div>© 2026 DiVa Systems Inc.</div>
+            <div>----------------------------------------</div>
+            <div style="margin-top: 20px;"></div>
+            <div>System Initialization...</div>
+            <div style="margin-top: 15px;"></div>
+            <div>Please enter your name:</div>
+        </div>
+        
+        <div class="prompt">
+            <span class="prompt-symbol">&gt;</span>
+            <input type="text" id="userInput" autofocus autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+        const input = document.getElementById('userInput');
+        const output = document.getElementById('output');
+        
+        let stage = 'name'; // Stages: name, survey_prompt, pizza_question, varun_question, survey_enjoyment, valentine_question
+        let selfDestructTimer = null;
+        
+        // Create audio context
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSadJingle() {
+            const now = audioContext.currentTime;
+            
+            // "What Was I Made For" meow version - sad, slow melody
+            const notes = [
+                { freq: 329.63, time: 0, duration: 0.4 },     // E (meow)
+                { freq: 293.66, time: 0.5, duration: 0.4 },   // D (meow)
+                { freq: 261.63, time: 1.0, duration: 0.5 },   // C (meooow)
+                { freq: 246.94, time: 1.6, duration: 0.4 },   // B (meow)
+                { freq: 220.00, time: 2.1, duration: 0.6 },   // A (meooow)
+                { freq: 196.00, time: 2.8, duration: 0.8 }    // G (meeooow - sad)
+            ];
+            
+            notes.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = note.freq;
+                oscillator.type = 'sine';
+                
+                gainNode.gain.setValueAtTime(0, now + note.time);
+                gainNode.gain.linearRampToValueAtTime(0.25, now + note.time + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
+                
+                oscillator.start(now + note.time);
+                oscillator.stop(now + note.time + note.duration);
+            });
+        }
+        
+        function playHappyJingle() {
+            const now = audioContext.currentTime;
+            
+            // Happy happy happy cat song - upbeat, cheerful melody
+            const notes = [
+                { freq: 523.25, time: 0, duration: 0.2 },     // C5 (happy!)
+                { freq: 587.33, time: 0.2, duration: 0.2 },   // D5 (happy!)
+                { freq: 659.25, time: 0.4, duration: 0.2 },   // E5 (happy!)
+                { freq: 698.46, time: 0.6, duration: 0.3 },   // F5 (cat!)
+                { freq: 659.25, time: 0.9, duration: 0.2 },   // E5 (happy!)
+                { freq: 587.33, time: 1.1, duration: 0.2 },   // D5 (happy!)
+                { freq: 523.25, time: 1.3, duration: 0.4 }    // C5 (yay!)
+            ];
+            
+            notes.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = note.freq;
+                oscillator.type = 'triangle';
+                
+                gainNode.gain.setValueAtTime(0, now + note.time);
+                gainNode.gain.linearRampToValueAtTime(0.3, now + note.time + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + note.time + note.duration);
+                
+                oscillator.start(now + note.time);
+                oscillator.stop(now + note.time + note.duration);
+            });
+        }
+
+        function playDrumroll() {
+            const now = audioContext.currentTime;
+            
+            // Create a pleasant drumroll with tonal drums
+            // Use lower frequency oscillators for a warm drum sound
+            const rollDuration = 2.0;
+            const hitsPerSecond = 16; // Start slower
+            const totalHits = Math.floor(rollDuration * hitsPerSecond);
+            
+            for (let i = 0; i < totalHits; i++) {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                // Warm drum tone around 150-200 Hz
+                oscillator.frequency.value = 180 + Math.random() * 20;
+                oscillator.type = 'triangle';
+                
+                // Progressive timing - speed up slightly toward the end
+                const timeSpacing = 0.06 - (i / totalHits) * 0.02;
+                const time = now + (i * timeSpacing);
+                
+                // Gradually increase volume
+                const volume = 0.15 + (i / totalHits) * 0.15;
+                
+                gainNode.gain.setValueAtTime(0, time);
+                gainNode.gain.linearRampToValueAtTime(volume, time + 0.005);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
+                
+                oscillator.start(time);
+                oscillator.stop(time + 0.05);
+            }
+            
+            // Final cymbal/bell sound - bright and celebratory
+            const cymbalTime = now + 2.0;
+            const cymbal = audioContext.createOscillator();
+            const cymbalGain = audioContext.createGain();
+            
+            cymbal.connect(cymbalGain);
+            cymbalGain.connect(audioContext.destination);
+            
+            cymbal.frequency.value = 1200; // Bright bell tone
+            cymbal.type = 'sine';
+            
+            cymbalGain.gain.setValueAtTime(0.25, cymbalTime);
+            cymbalGain.gain.exponentialRampToValueAtTime(0.01, cymbalTime + 0.5);
+            
+            cymbal.start(cymbalTime);
+            cymbal.stop(cymbalTime + 0.5);
+        }
+
+        function addOutput(text, className = '') {
+            const div = document.createElement('div');
+            div.textContent = text;
+            if (className) div.className = className;
+            output.appendChild(div);
+            window.scrollTo(0, document.body.scrollHeight);
+        }
+        
+        function selfDestruct() {
+            addOutput('');
+            addOutput('⚠️  UNAUTHORIZED ACCESS DETECTED ⚠️', 'error');
+            addOutput('Initiating self-destruct sequence...', 'error');
+            addOutput('');
+            
+            let countdown = 5;
+            const countdownInterval = setInterval(() => {
+                addOutput(countdown + '...', 'error');
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(countdownInterval);
+                    addOutput('');
+                    addOutput('💥 SYSTEM DESTROYED 💥', 'error');
+                    addOutput('');
+                    addOutput('This terminal will now close.');
+                    input.disabled = true;
+                    input.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        document.body.innerHTML = '<div style="color: #ff0000; font-family: monospace; text-align: center; padding: 50px; font-size: 24px;">ACCESS DENIED</div>';
+                    }, 2000);
+                }
+            }, 1000);
+        }
+
+        function showSadResponse() {
+            playSadJingle();
+            
+            const sadArt = `
+    ___
+   /   \\
+  | T T |
+   \\___/
+    |||
+    |||
+`;
+            
+            addOutput('');
+            addOutput(sadArt, 'ascii-art heart');
+            addOutput('ERROR: Response "no" not accepted.', 'error');
+            addOutput('Processing sadness...', 'error');
+            addOutput('');
+            
+            setTimeout(() => {
+                addOutput('Please reconsider...');
+                addOutput('');
+                addOutput('Diti, will you be my Valentine?');
+                addOutput('Please type \'yes\' or \'no\' and press Enter:');
+            }, 3500);
+        }
+
+        function showHappyResponse() {
+            playHappyJingle();
+            
+            const happyArt = `
+    ♥♥♥
+   ♥   ♥
+  ♥  ^  ♥
+ ♥   ω   ♥
+  ♥     ♥
+   ♥   ♥
+    ♥♥♥
+`;
+            
+            addOutput('');
+            addOutput(happyArt, 'ascii-art heart');
+            addOutput('🎉 YAYYYYYYYYYYYY🎉');
+            addOutput('');
+            addOutput('I love you so much! ❤️');
+            addOutput('Can\'t wait to spend my first Valentine\'s with you! 💕');
+            addOutput('');
+            addOutput('System status: COMPLETE');
+            input.disabled = true;
+            input.style.display = 'none';
+        }
+
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                const value = input.value.trim();
+                const valueLower = value.toLowerCase();
+                
+                addOutput('> ' + input.value);
+                
+                if (stage === 'name') {
+                    // Check if name is Diti or Diti Golder
+                    if (valueLower === 'diti' || valueLower === 'diti golder') {
+                        addOutput('');
+                        addOutput('✓ Identity verified: ' + value);
+                        addOutput('Welcome, ' + value + '!');
+                        addOutput('');
+                        addOutput('----------------------------------------');
+                        addOutput('You have been selected to complete a short survey.');
+                        addOutput('');
+                        addOutput('Do you want to continue? (yes/no)');
+                        stage = 'survey_prompt';
+                    } else {
+                        addOutput('');
+                        addOutput('✗ Identity verification failed.', 'error');
+                        selfDestruct();
+                    }
+                } else if (stage === 'survey_prompt') {
+                    addOutput('');
+                    if (valueLower === 'no') {
+                        addOutput('jk this is mandatory');
+                        addOutput('Continuing with survey...');
+                    } else {
+                        addOutput('Great! Let\'s begin...');
+                    }
+                    addOutput('');
+                    addOutput('----------------------------------------');
+                    addOutput('SURVEY - QUESTION 1 OF 4');
+                    addOutput('');
+                    addOutput('On a scale of 1-10, how much do you love pizza?');
+                    addOutput('');
+                    addOutput('Please enter a number from 1 to 10:');
+                    stage = 'pizza_question';
+                } else if (stage === 'pizza_question') {
+                    const pizzaRating = parseInt(valueLower);
+                    addOutput('');
+                    if (pizzaRating >= 1 && pizzaRating <= 10) {
+                        if (pizzaRating >= 8) {
+                            addOutput('literally same 🍕');
+                        } else if (pizzaRating >= 5) {
+                            addOutput('not great not terrible 🍕');
+                        } else {
+                            addOutput('BUT IT HAS PEPPERONI 🍕');
+                        }
+                    } else {
+                        addOutput('That\'s... not a number between 1-10, but okay! 🍕');
+                    }
+                    addOutput('');
+                    addOutput('----------------------------------------');
+                    addOutput('SURVEY - QUESTION 2 OF 4');
+                    addOutput('');
+                    addOutput('On a scale of 1-10, how much do you love Varun?');
+                    addOutput('');
+                    addOutput('Please enter a number:');
+                    stage = 'varun_question';
+                } else if (stage === 'varun_question') {
+                    const varunRating = parseInt(valueLower);
+                    addOutput('');
+                    if (!isNaN(varunRating)) {
+                        if (varunRating >= 8) {
+                            addOutput('woah that\'s a lot 💕');
+                            addOutput('');
+                            addOutput('----------------------------------------');
+                            addOutput('SURVEY - QUESTION 3 OF 4');
+                            addOutput('');
+                            addOutput('Are you enjoying this survey so far?');
+                            addOutput('');
+                            addOutput('Please type \'yes\' or \'no\' and press Enter:');
+                            stage = 'survey_enjoyment';
+                        } else if (varunRating >= 1 && varunRating <= 7) {
+                            addOutput('i kinda expected more tbh');
+                            addOutput('');
+                            addOutput('Let\'s try that again...');
+                            addOutput('');
+                            addOutput('On a scale of 1-10, how much do you love Varun?');
+                            addOutput('');
+                            addOutput('Please enter a number:');
+                            // Stay in varun_question stage
+                        } else {
+                            addOutput('GIRL YOU PLAYIN');
+                            addOutput('');
+                            addOutput('Let\'s be serious now...');
+                            addOutput('');
+                            addOutput('On a scale of 1-10, how much do you love Varun?');
+                            addOutput('');
+                            addOutput('Please enter a number:');
+                            // Stay in varun_question stage
+                        }
+                    } else {
+                        addOutput('GIRL YOU PLAYIN');
+                        addOutput('');
+                        addOutput('Let\'s be serious now...');
+                        addOutput('');
+                        addOutput('On a scale of 1-10, how much do you love Varun?');
+                        addOutput('');
+                        addOutput('Please enter a number:');
+                        // Stay in varun_question stage
+                    }
+                } else if (stage === 'survey_enjoyment') {
+                    addOutput('');
+                    if (valueLower === 'yes') {
+                        addOutput('Yay! I\'m glad!');
+                    } else if (valueLower === 'no') {
+                        addOutput('Too bad, one more question!');
+                    } else {
+                        addOutput('I\'ll take that as a maybe...');
+                    }
+                    addOutput('');
+                    addOutput('----------------------------------------');
+                    addOutput('SURVEY - QUESTION 4 OF 4');
+                    addOutput('');
+                    
+                    // Play drumroll
+                    playDrumroll();
+                    
+                    setTimeout(() => {
+                        addOutput('💝 Diti, will you be my Valentine? 💝');
+                        addOutput('');
+                        addOutput('Please type \'yes\' or \'no\' and press Enter:');
+                    }, 2500); // Wait for drumroll to finish
+                    
+                    stage = 'valentine_question';
+                } else if (stage === 'valentine_question') {
+                    if (valueLower === 'yes') {
+                        showHappyResponse();
+                    } else if (valueLower === 'no') {
+                        showSadResponse();
+                    } else {
+                        addOutput('');
+                        addOutput('Invalid input. Please type \'yes\' or \'no\'.', 'error');
+                        addOutput('');
+                    }
+                }
+                
+                input.value = '';
+            }
+        });
+
+        // Auto-focus on input
+        input.focus();
+    </script>
+</body>
+</html>
